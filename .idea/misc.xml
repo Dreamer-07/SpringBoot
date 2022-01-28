@@ -5,6 +5,7 @@
       <list>
         <option value="$PROJECT_DIR$/01-hello-world/pom.xml" />
         <option value="$PROJECT_DIR$/boot-02-core/pom.xml" />
+        <option value="$PROJECT_DIR$/boot-02-yaml/pom.xml" />
       </list>
     </option>
   </component>

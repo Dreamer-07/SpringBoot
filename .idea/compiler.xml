@@ -8,18 +8,18 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="01-hello-world" />
-        <module name="boot-02-core" />
+        <module name="boot-02-yaml" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="01-hello-world" target="1.8" />
-      <module name="boot-02-core" target="1.8" />
+      <module name="boot-02-yaml" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="01-hello-world" options="-parameters" />
-      <module name="boot-02-core" options="-parameters" />
+      <module name="boot-02-yaml" options="-parameters" />
     </option>
   </component>
 </project>

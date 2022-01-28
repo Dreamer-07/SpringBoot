@@ -8,7 +8,7 @@
         <version>2.3.4.RELEASE</version>
     </parent>
     <groupId>pers.prover07.boot</groupId>
-    <artifactId>boot-02-core</artifactId>
+    <artifactId>boot-02-yaml</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>boot-02-core</name>
     <description>boot-02-core</description>
