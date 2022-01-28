@@ -1,0 +1,29 @@
+person:
+  boos: false
+  # 默认的日期格式用 /
+  birth: 2021/10/20
+  age: 18
+  pet:
+    name: 阿猫
+    weight: 199.9
+  interests: [ 篮球,敲代码,旅游 ]
+  animal:
+    - 狗狗
+    - 猫
+  score:
+    english:
+      first: 30
+      second: 40
+      third: 50
+    math: [ 131,140,150 ]
+    # 对象的行内写法，属性和属性值之间可以不用空格
+    chinese: { first:128,second:136 }
+  salarys: [ 3999,4999,5999 ]
+  allPets:
+    sick:
+      - { name: qiguai }
+      - name: eihei
+        weight: 1999
+    # 如果对象数组需要使用行内写法，则对象的属性和属性值之间也要加空格
+    health: [ { name: maomao,weight: 2999 },{ name: wangjile } ]
+  user-name: zhangsan
