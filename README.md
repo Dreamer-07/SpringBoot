@@ -520,9 +520,136 @@ person:
 
 和配置 `index.html` 一样，默认名为 `favicon.ico` ，测试的时候注意重启游览器避免缓存即可
 
+### 请求参数处理
 
+#### 普通参数与基本注解
 
+- @RequestParam / @RequestHeader / @RequestBody / @CookieValue / @PathVariable
 
+  基础使用可以参考 SpringMVC：TODO
+
+  扩展：
+
+  ```java
+  /**
+  * 扩展
+  * {@code @PathVariable} 注解可以不写 value 后面定义一个 Map<String,String> 的形参，路径上的所有参数都会以 k v 的风格封装进去
+  * {@code @RequestHeader} ~，本次请求的所有请求头信息都会以 k v 的风格封装技进去
+  * {@code @RequestParam} ~, 本次请求的所有请求参数都会以 k v 的风格封装进去
+  * {@code @CookieValue} 形参的类型可以设置为 Cookie 类型，会自动封装 Cookie 信息
+  *
+  * @param pathVars
+  * @return
+  */
+  @GetMapping("/car/{id}/user/{username}")
+  public Map getCar(@PathVariable Map<String, String> pathVars,
+                    @RequestHeader Map<String, String> headers,
+                    @RequestParam Map<String, String> params,
+                    @CookieValue("_ga") Cookie _ga) {
+      HashMap<String, Object> dataMap  = new HashMap<>();
+      dataMap.put("pathVars", pathVars);
+      dataMap.put("headers", headers);
+      dataMap.put("params", params);
+      dataMap.put("_ga", _ga);
+      return dataMap;
+  }
+  ```
+
+- @RequestAttribute
+
+  作用：获取 request 域中的数据
+
+  ```java
+  @GetMapping("/go/success")
+  public String goSuccess(Model model) {
+      model.addAttribute("msg", "前往 success 请求...");
+      model.addAttribute("code", 200);
+      return "forward:/success";
+  }
+  
+  @GetMapping("/success")
+  @ResponseBody
+  public Map success(@RequestAttribute("msg") String msg,
+                     @RequestAttribute("code") Integer code) {
+      HashMap<String, Object> dataMap = new HashMap<>();
+      dataMap.put("msg", msg);
+      dataMap.put("code", code);
+      return dataMap;
+  }
+  ```
+
+  注意：这个注解不能像前面几个一样用 Map 接收全部数据
+
+- @MatrixVariable
+
+  作用：获取矩阵变量的值
+
+  > 矩阵变量：存在于路径变量之后，变量间用;隔开
+  >
+  > - 应用场景：当游览器禁用 Cookie 后，如果需要使用 session，就可以通过矩阵变量传递 **jsessionid** 标识客户端身份的同时与请求参数分开管理
+
+  使用：
+
+  1. 定制化 SpringBoot 解析请求路径的组件 **UrlPathHelper**
+
+     ```java
+     @Configuration
+     public class WebConfig implements WebMvcConfigurer {
+     
+         /**
+          * 定制化 SpringBoot 解析路径的 PathUrlHelper 组件
+          * @param configurer
+          */
+         @Override
+         public void configurePathMatch(PathMatchConfigurer configurer) {
+             UrlPathHelper urlPathHelper = new UrlPathHelper();
+             // 默认情况下，会将请求路径;后的所有东西后删除
+             urlPathHelper.setRemoveSemicolonContent(false);
+             configurer.setUrlPathHelper(urlPathHelper);
+         }
+     }
+     ```
+
+  2. 编写页面链接
+
+     ```html
+     <a href="/testMatrixVariable/testPath;name=zhangsan;age=16">(请求参数处理)测试 @testMatrixVariable</a>
+     ```
+
+  3. 编写接口
+
+     ```java
+     @GetMapping("/testMatrixVariable/{path1}")
+     @ResponseBody
+     public Map testMatrixVariable(@MatrixVariable("name") String name,
+                                   @MatrixVariable("age") Integer age,
+                                   @PathVariable("path1") String path1) {
+         HashMap<String, Object> dataMap = new HashMap<>();
+         dataMap.put("name", name);
+         dataMap.put("age", age);
+         dataMap.put("path1", path1);
+         return dataMap;
+     }
+     ```
+
+  4. 测试
+
+  注意：
+
+  1. 只有在 url 中使用的路径变量才可以使用矩阵变量
+
+  2. 如果 url 中存在多个路径变量,可以通过属性 `pathVar` 解决
+
+     ```java
+     @GetMapping("/testMatrixVariable/{path1}/{path2}")
+     @ResponseBody
+     public Map testMatrixVariable(@MatrixVariable(value = "num", pathVar = "path1") String num1,
+                                   @MatrixVariable(value = "num", pathVar = "path2") String num2){
+     ```
+
+     > /testMatrixVariable/test1;a=b/test2;c=d
+
+  
 
 
 
