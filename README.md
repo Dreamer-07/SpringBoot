@@ -454,7 +454,71 @@ person:
 
 ## Web 
 
+### 简单功能分析
 
+#### 静态资源访问
+
+默认的静态资源文件下路径：类路径(`/main/resources`)下的 `/static` or `/resources` or `/META-INF/resouces` or `/public`
+
+原理：配置静态资源处理器映射关系为 `/**`，当游览器发送请求时，先判断是否有对应的请求接口，如果没有再有静态资源处理器处理
+
+> 配置
+
+1. 修改静态资源访问前缀
+
+   ```yaml
+   spring:
+     mvc:
+       static-path-pattern: /res/**
+   ```
+
+   作用：访问静态资源时需要加上前缀 `/res`
+
+2. 修改静态资源文件夹路径
+
+   ```yaml
+   spring:
+     resources:
+       static-locations: classpath:/haha/
+   ```
+
+   让其他默认的四个静态资源文件夹全部失效，重新设置静态资源文件夹
+
+> 扩展 - webjars
+
+作用：将一些 JS/CSS 框架弄成了 jar 包，也可以在 Maven 中引入使用
+
+使用：https://www.webjars.org/
+
+1. 导入依赖
+
+   ```xml
+   <dependency>
+       <groupId>org.webjars</groupId>
+       <artifactId>jquery</artifactId>
+       <version>3.5.1</version>
+   </dependency>
+   ```
+
+2. 可以在 lib 模块下查看相关静态资源文件
+
+   ![image-20220129075538562](README.assets/image-20220129075538562.png)
+
+3. 以访问图上的 `jquery.js` 为例，访问 `/webjars/jquery/3.5.1/jquery.js` 即可
+
+   ![image-20220129075846602](README.assets/image-20220129075846602.png)
+
+   实际上就是 jar 包中静态资源的路径
+
+#### 欢迎页支持
+
+只需要在 静态资源文件夹 下创建 `index.html` 即可直接访问，但注意不能配置 `spring-mvc-static-path-pattern`(2.3.4 中是这样，好像2.5修复了，知道的小伙伴可以在评论区说一下)
+
+![image-20220129080825688](README.assets/image-20220129080825688.png)
+
+#### 自定义 Favicon
+
+和配置 `index.html` 一样，默认名为 `favicon.ico` ，测试的时候注意重启游览器避免缓存即可
 
 
 
