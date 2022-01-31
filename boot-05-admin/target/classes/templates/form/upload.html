@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+</head>
+<body>
+<form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+    邮箱：<input type="text" name="email" /> <br />
+    名字: <input type="text" name="username" /> <br />
+    头像: <input type="file" name="photo"> <br />
+    照片集: <input type="file" name="imgs" multiple> <br />
+    <input type="submit" value="提交" />
+</form>
+</body>
+</html>

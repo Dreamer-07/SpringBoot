@@ -27,4 +27,9 @@ public class RouterController {
         return "home";
     }
 
+    @GetMapping("/file")
+    public String routeFileUpload(){
+        return "form/upload";
+    }
+
 }

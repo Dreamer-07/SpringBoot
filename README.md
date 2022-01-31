@@ -801,7 +801,7 @@ SpringBoot 支持的第三方模板引擎：
 
   第一个参数表示遍历的元素，第二个参数表示本次遍历进行的一个状态
 
-### 拦截器
+### 拦截器 - 登录拦截
 
 > 关于拦截器：TODO
 
@@ -854,7 +854,52 @@ SpringBoot 支持的第三方模板引擎：
 
 3. 测试
 
+### 文件上传
 
+1. 编写前端页面
+
+   ```html
+   <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+       邮箱：<input type="text" name="email" /> <br />
+       名字: <input type="text" name="username" /> <br />
+       头像: <input type="file" name="photo"> <br />
+       照片集: <input type="file" name="imgs" multiple> <br />
+   </form>
+   ```
+
+2. 编写接口
+
+   ```java
+   /**
+   * 文件上传，如果存在不同的文件属性，可以通过 @RequestPart 指定参数名用来接收文件
+   * @param photo 单文件
+   * @param imgs 多文件
+   */
+   @PostMapping("/upload")
+   public String uplaodFile(@RequestParam("email") String email,
+                            @RequestParam("username") String username,
+                            @RequestPart("photo") MultipartFile photo,
+                            @RequestPart("imgs") MultipartFile[] imgs,
+                            HttpSession session) throws IOException {
+       log.info("request info: email={}, username={}, photo.size={}, imgs.length={}",
+                email, username, photo.getSize(), imgs.length);
+       // 获取保存图片文件夹路径
+       String photoPath = session.getServletContext().getRealPath("photo");
+       // 判断文件夹是否存在，如果不存在就创建对应的目录
+       System.out.println(photoPath);
+       File file = new File(photoPath);
+       if (!file.exists()) {
+           file.mkdir();
+       }
+       // 保存图片到本地服务器
+       photo.transferTo(new File(photoPath + File.separator + photo.getOriginalFilename()));
+       return "/home";
+   }
+   ```
+
+3. 测试
+
+   
 
 
 
