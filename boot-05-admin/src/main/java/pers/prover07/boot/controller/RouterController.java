@@ -24,10 +24,6 @@ public class RouterController {
 
     @GetMapping("/home")
     public String routeHome(HttpSession session, Model model) {
-        if (session.getAttribute("userInfo") == null) {
-            model.addAttribute("msg", "请先登录");
-            return "login";
-        }
         return "home";
     }
 

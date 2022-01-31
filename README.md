@@ -801,6 +801,61 @@ SpringBoot 支持的第三方模板引擎：
 
   第一个参数表示遍历的元素，第二个参数表示本次遍历进行的一个状态
 
+### 拦截器
+
+> 关于拦截器：TODO
+
+1. 编写一个类，实现 **HandlerInterceptor** 接口并重写 `preHandle` 方法
+
+   ```java
+   public class LoginInterceptor implements HandlerInterceptor {
+   
+       /**
+        * 在调用控制器接口之前被调用
+        * @param request
+        * @param response
+        * @param handler
+        * @return
+        * @throws Exception
+        */
+       @Override
+       public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+           Object userInfo = request.getSession().getAttribute("userInfo");
+           if (userInfo != null){
+               // 放行
+               return true;
+           }
+           request.setAttribute("msg", "请先登录");
+           // 转发到 / 请求
+           request.getRequestDispatcher("/").forward(request, response);
+           return false;
+       }
+   }
+   ```
+
+2. 在配置类中为该拦截器添加配置
+
+   ```java
+   @Configuration
+   public class WebConfig implements WebMvcConfigurer {
+   
+       /**
+        * 添加拦截器
+        * @param registry
+        */
+       @Override
+       public void addInterceptors(InterceptorRegistry registry) {
+           registry.addInterceptor(new LoginInterceptor())
+               .addPathPatterns("/**")
+               .excludePathPatterns("/", "/login", "/css/**", "/js/**", "/images/**", "/fonts/**");
+       }
+   }
+   ```
+
+3. 测试
+
+
+
 
 
 
