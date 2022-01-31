@@ -899,9 +899,94 @@ SpringBoot 支持的第三方模板引擎：
 
 3. 测试
 
+### 异常处理
+
+> SpringBoot 默认错误处理规则
+
+- 根据错误的 HTTP 响应状态码，会在 `templates/error` 下找到对应的页面，例如 `code=404 -> templates/error/404.html` ;
+-  如果不存在对应的页面，`code=404 -> templates/error/4xx.html`  会根据开头数字找 xx 页面; 
+- 如果都不存在就会响应一个 `whitelabel` 视图
+
+![image-20220131155007362](README.assets/image-20220131155007362.png)
+
+> 定制错误处理逻辑
+
+1. 自定义错误页
+
+   在 `templates/error` 下创建对应的模板文件即可，
+
+   可以通过 Postman 观察请求的响应信息，然后通过 thymeleaf 将错误信息渲染到视图上
+
+   ![image-20220131155649354](README.assets/image-20220131155649354.png)
+
+   ```html
+   <h1 th:text="${status}"></h1>
+   <h2 th:text="${error}"></h2>
+   <h3 th:text="${message}"></h3>
+   ```
+
+   ![templates/error/4xx.html](README.assets/image-20220131155825801.png)
+
+2. SpringMVC 中的 `@ControllerAdvice + @ExceptionHandler` 处理 web controller 全局异常：TODO
+
+3. `@ResponseStatus`  + 自定义异常
+
+   ```java
+   /**
+    * 自定义异常，通过 @ResponseStatus 注解标识如果出现该异常应该如何响应(code: 响应码, reason: 响应信息)
+    * @author by Prover07
+    * @classname CustomeException
+    * @description TODO
+    * @date 2022/1/31 16:00
+    */
+   @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "这是一个错误的请求")
+   public class CustomException extends Exception{
    
+       public CustomException() {
+       }
+   
+       public CustomException(String message) {
+           super(message);
+       }
+   }
+   ```
 
+   ```java
+   @GetMapping("/testException")
+   public String testHandleException() throws CustomException {
+       throw new CustomException();
+   }
+   ```
 
+   ![image-20220131160437402](README.assets/image-20220131160437402.png)
+
+4. 自定义实现 HandlerExceptionResolver 处理异常；可以作为默认的全局异常处理规则
+
+   ```java
+   @Order(1) // 通过 @Order 注解可以提高该异常解析器的执行顺序，越小越早执行
+   @Component
+   public class CustomHandlerExceptionResolver implements HandlerExceptionResolver {
+   
+       /**
+        * 解析异常，如果可以解析就返回 mv 对象，不可以就返回 null 即可
+        * @param httpServletRequest
+        * @param httpServletResponse
+        * @param o
+        * @param e
+        * @return
+        */
+       @Override
+       public ModelAndView resolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) {
+           if (e instanceof CustomException) {
+               return null;
+           }
+           return new ModelAndView();
+       }
+   
+   }
+   ```
+
+   
 
 
 

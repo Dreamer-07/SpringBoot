@@ -25,13 +25,14 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         Object userInfo = request.getSession().getAttribute("userInfo");
-        if (userInfo != null){
-            // 放行
-            return true;
-        }
-        request.setAttribute("msg", "请先登录");
-        // 转发到 / 请求
-        request.getRequestDispatcher("/").forward(request, response);
-        return false;
+        //if (userInfo != null){
+        //    // 放行
+        //    return true;
+        //}
+        //request.setAttribute("msg", "请先登录");
+        //// 转发到 / 请求
+        //request.getRequestDispatcher("/").forward(request, response);
+        //return false;
+        return true;
     }
 }
