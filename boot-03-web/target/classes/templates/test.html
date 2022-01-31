@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<!-- 引入对应的命名空间 -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>成功</title>
+</head>
+<body>
+<!-- th:text 会读取 request 域中的数据，如果不走模板渲染直接打开页面的话，会显示'默认字段' -->
+<p th:text="${msg}">默认字段</p>
+</body>
+</html>

@@ -520,9 +520,7 @@ person:
 
 和配置 `index.html` 一样，默认名为 `favicon.ico` ，测试的时候注意重启游览器避免缓存即可
 
-### 请求参数处理
-
-#### 普通参数与基本注解
+### 请求参数处理(注解)
 
 - @RequestParam / @RequestHeader / @RequestBody / @CookieValue / @PathVariable
 
@@ -649,11 +647,159 @@ person:
 
      > /testMatrixVariable/test1;a=b/test2;c=d
 
-  
+### 视图解析和模板引擎
+
+> SpringBoot 默认不支持 JSP，需要引入其他的第三方模板引擎技术实现页面渲染
+
+#### 视图解析
+
+视图处理方式
+
+1. 转发
+2. 重定向
+3. 自定义视图
+
+SpringBoot 支持的第三方模板引擎：
+
+1. freemarker
+2. groovy-templates
+3. thymeleaf
+
+#### thymeleaf
+
+作用：和 JSP 差不多，且 SpringBoot 不支持 JSP
+
+使用：学过 JSP 的话看一下表达式就好了，不难 https://www.yuque.com/atguigu/springboot/vgzmgh
+
+![image-20220130190248888](README.assets/image-20220130190248888.png)
 
 
+#### thymeleaf-hello world
 
+1. 引入依赖
 
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-thymeleaf</artifactId>
+   </dependency>
+   ```
+
+2. 在 `resources/templates`  下创建 html 文件
+
+   ```html
+   <!DOCTYPE html>
+   <!-- 引入对应的命名空间 -->
+   <html lang="en" xmlns:th="http://www.thymeleaf.org">
+       <head>
+           <meta charset="UTF-8">
+           <title>成功</title>
+       </head>
+       <body>
+           <!-- th:text 会读取 request 域中的数据，如果不走模板渲染直接打开页面的话，会显示'默认字段' -->
+           <p th:text="${msg}">默认字段</p>
+       </body>
+   </html>
+   ```
+
+3. 创建视图渲染接口
+
+   ```java
+   @GetMapping("/thymeleaf")
+   public String toSuccess(Model model){
+       model.addAttribute("msg", "Hello Thymeleaf");
+       // 直接返回视图名即可, SpringBoot 底层会自动帮我们拼接
+       return "test";
+   }
+   ```
+
+4. 测试，访问接口
+
+#### themeleaf-实战[后台管理]
+
+前端后台模板：AdminEx
+
+项目依赖
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <scope>runtime</scope>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+> 这里只会记录本人学习时遇到的知识点，不如项目太细，每块都记的话太费时间
+
+学习视频(感兴趣的可以跟着做一下)：https://www.bilibili.com/video/BV19K4y1L7MT?p=44
+
+- 抽取模板页面公共部分
+
+  1. 在 `templates` 下创建 common.html
+
+     ![image-20220130211932014](README.assets/image-20220130211932014.png)
+
+  2. 在其他模板页面中直接引用
+
+     - 使用 `th:include`
+
+       ```html
+       <!-- 引用公共模板的语法都是一样 -> 公共页面相对于根目录的位置 :: 公共页面中的公共模板标识 -->
+       <!-- th:include -> 用这里定义的外部元素(div)替换掉公共模板的的根元素 -->
+       <div th:include="common :: common_link"></div>
+       ```
+
+       ![image-20220130212844188](README.assets/image-20220130212844188.png)
+
+     - 使用 `th:replace`
+
+       ```html
+       <!-- th:replace -> 用公共模板直接替换掉当前定义的元素 -->
+       <div th:replace="common :: common_script"></div>
+       ```
+
+       ![image-20220130212925704](README.assets/image-20220130212925704.png)
+
+     
+
+- thymeleaf 循环渲染数据
+
+  ```html
+  <tr class="gradeX" th:each="user,stats : ${userList}">
+      <td th:text="${stats.count}"></td>
+      <td th:text="${user.username}"></td>
+      <td th:text="${user.password}"></td>
+  </tr>
+  ```
+
+  第一个参数表示遍历的元素，第二个参数表示本次遍历进行的一个状态
 
 
 
