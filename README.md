@@ -986,11 +986,117 @@ SpringBoot 支持的第三方模板引擎：
    }
    ```
 
+### Web 原生组件注入(Servlet / Filter / Listener)
+
+#### 原生组件注入
+
+1. 使用 `@WebServlet` / `@WebFilter` / `@WebListener` 配置组件
+
+   ```java
+   /**
+    * 通过 urlPatterns 属性配置 Servlet 映射 url
+    * @author by Prover07
+    * @classname MyServlet
+    * @description TODO
+    * @date 2022/1/31 17:31
+    */
+   @WebServlet(urlPatterns = "/my")
+   public class MyServlet extends HttpServlet {
    
+       @Override
+       protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+           resp.getWriter().write("巴御前天下第一");
+       }
+   }
+   ```
 
+   ```java
+   /**
+    * 通过 urlPattern 属性配置该过滤器会过滤的请求
+    * @author by Prover07
+    * @classname MyFilter
+    * @description TODO
+    * @date 2022/1/31 17:34
+    */
+   @Slf4j
+   @WebFilter(urlPatterns = "/my")
+   public class MyFilter implements Filter {
+   
+       @Override
+       public void init(FilterConfig filterConfig) throws ServletException {
+           log.info("MyFilter inited...");
+       }
+   
+       @Override
+       public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+           log.info("MyFilter working...");
+           filterChain.doFilter(servletRequest, servletResponse);
+       }
+   
+       @Override
+       public void destroy() {
+           log.info("MyFilter destory...");
+       }
+   }
+   ```
 
+   ```java
+   @Slf4j
+   @WebListener
+   public class MyListener implements ServletContextListener {
+   
+       @Override
+       public void contextInitialized(ServletContextEvent sce) {
+           log.info("ServletContext init...");
+       }
+   
+       @Override
+       public void contextDestroyed(ServletContextEvent sce) {
+           log.info("ServletContext destory...");
+       }
+   }
+   ```
 
+2. 在启动类上添加 `@ServletComponentSacn` 注解
 
+   ```java
+   @ServletComponentScan("pers.prover07.boot.custom") // 标注原生组件所在位置
+   @SpringBootApplication
+   public class Boot05AdminApplication {
+   ```
+
+#### Spring 注入
+
+1. 和第一种方式的第一步一样，但不用添加 `@WebServlet` / `@WebFilter` / `@WebListener` 注解
+
+2. 创建配置类
+
+   ```java
+   @Configuration
+   public class WebComponentConfig {
+   
+       @Bean
+       public ServletRegistrationBean<MyServlet> myServlet() {
+           return new ServletRegistrationBean<>(new MyServlet(), "/my");
+       }
+   
+       @Bean
+       public FilterRegistrationBean<MyFilter> myFilter() {
+           FilterRegistrationBean<MyFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
+           filterFilterRegistrationBean.setFilter(new MyFilter());
+           filterFilterRegistrationBean.setUrlPatterns(Collections.singletonList("/my"));
+           return filterFilterRegistrationBean;
+       }
+   
+       @Bean
+       public ServletListenerRegistrationBean<MyListener> myListener() {
+           return new ServletListenerRegistrationBean<>(new MyListener());
+       }
+   
+   }
+   ```
+
+   
 
 
 
