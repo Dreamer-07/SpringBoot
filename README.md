@@ -1096,9 +1096,379 @@ SpringBoot 支持的第三方模板引擎：
    }
    ```
 
+### 定制化 SpringBoot 组件
+
+1. 修改相关的配置文件
+2. 编写配置类 @Configuration + @Bean 注解实现替换/增加容器中的默认组件
+3. 编写配置类实现  **WebMvcConfigurer** 接口，通过重写接口内的方法实现定制化 web 功能
+4. 使用 `@EnableWebMVC` +  **WebMvcConfigurer** 接口可以实现全面接管 SpringMVC(慎用，会导致部分功能失效)
+
+## 单元测试(Junit5)
+
+### 简介
+
+> SpringBoot 2.2.0 版本开始引入 Junit5 作为单元测试默认库
+
+新的 Junit 由三个不同子项目的不同模块组件：
+
+- **JUnit Platform**: Junit Platform是在JVM上启动测试框架的基础，不仅支持Junit自制的测试引擎，其他测试引擎也都可以接入。
+
+- **JUnit Jupiter**: JUnit Jupiter提供了JUnit5的新的编程模型，是JUnit5新特性的核心。内部 包含了一个**测试引擎**，用于在Junit Platform上运行。
+
+- **JUnit Vintage**: 由于JUint已经发展多年，为了照顾老的项目，JUnit Vintage提供了兼容 JUnit4.x,Junit3.x的 测试引擎。
+
+  ![img](README.assets/1606796395719-eb57ab48-ae44-45e5-8d2e-c4d507aff49a.png)
+
+注意：在 SpringBoot 2.4 以上的版本默认移除了 Junit Vintage 的依赖，如果需要兼容 Junit4 需要自行引入
+
+```xml
+<dependency>
+    <groupId>org.junit.vintage</groupId>
+    <artifactId>junit-vintage-engine</artifactId>
+    <scope>test</scope>
+    <exclusions>
+        <exclusion>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+Junit5 依赖：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+### 常用注解
+
+- @Test：表示该方法是测试方法
+- @DisplayName :为测试类或者测试方法设置展示名称
+- @BeforeEach :表示在每个单元测试之前执行
+- @AfterEach :表示在每个单元测试之后执行
+
+- @BeforeAll :表示在所有单元测试之前执行
+- @AfterAll :表示在所有单元测试之后执行
+- @Disabled :表示测试类或测试方法不执行，类似于JUnit4中的@Ignore
+- @Timeout :表示测试方法运行如果超过了指定时间将会返回错误
+- @RepeatedTest: 可以指定要调用几次对应的测试方法
+
+```java
+@DisplayName("Junit5 单元测试")
+@SpringBootTest // 如果需要 Spring 驱动环境就需要打上该注解，不用则不需要
+public class Junit5Test {
+
+    @DisplayName("测试 @DisplayName")
+    @Test
+    void testDisplayName() {
+        System.out.println("test @DisplayName...");
+    }
+
+    @Disabled
+    @DisplayName("测试方法2")
+    @Test
+    void test2() {
+        System.out.println("测试方法2...");
+    }
+
+    @DisplayName("test @Timeout")
+    @Timeout(value = 500, unit = TimeUnit.MICROSECONDS)
+    @Test
+    void testTimeout() {
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RepeatedTest(5) // 重复调用5次
+    void test4() {
+        System.out.println("test @RepeatedTest...");
+    }
+
+    @BeforeEach
+    void testBeforeEach() {
+        System.out.println("test @BeforeEach");
+    }
+
+    @AfterEach
+    void testAfterEach() {
+        System.out.println("test @AfterEach");
+    }
+
+    @BeforeAll
+    static void testBeforeAll() {
+        System.out.println("test @BeforeAll");
+    }
+
+    @AfterAll
+    static void testAfterAll() {
+        System.out.println("test @AfterAll");
+    }
+
+}
+```
+
+可以点击类旁白的绿色三角符号调用所有测试方法
+
+![image-20220131193431222](README.assets/image-20220131193431222.png)
+
+### 断言机制
+
+作用：对测试中需要满足的条件进行验证，**这些断言方法都是 org.junit.jupiter.api.Assertions 的静态方法**。可以通过 Maven 插件提供的 test 功能调用所有测试方法并得到测试报告
+
+注意：断言一旦失败，往下的代码都不会生效
+
+#### 简单断言
+
+用来对单个值进行简单的验证。如：
+
+| 方法            | 说明                                 |
+| --------------- | ------------------------------------ |
+| assertEquals    | 判断两个对象或两个原始类型是否相等   |
+| assertNotEquals | 判断两个对象或两个原始类型是否不相等 |
+| assertSame      | 判断两个对象引用是否指向同一个对象   |
+| assertNotSame   | 判断两个对象引用是否指向不同的对象   |
+| assertTrue      | 判断给定的布尔值是否为 true          |
+| assertFalse     | 判断给定的布尔值是否为 false         |
+| assertNull      | 判断给定的对象引用是否为 null        |
+| assertNotNull   | 判断给定的对象引用是否不为 null      |
+
+```java
+@Test
+void testAssertEquals() {
+    // 第一个参数为预期的值，第二个参数为实际的值，第三个值为断言方法失败抛出的异常信息
+    assertEquals(1, 2, "两值并不相等");
+    // 其他的都差不多
+}
+```
+
+#### 数组断言
+
+通过 **assertArrayEquals** 方法来判断两个对象或原始类型的数组是否相等
+
+```java
+// 失败
+//assertArrayEquals(new Object[]{new Object()}, new Object[]{new Object()});
+// 成功
+assertArrayEquals(new int[]{1,2,3}, new int[]{1,2,3});
+```
+
+#### 组合断言
+
+**assertAll** 方法接受多个 org.junit.jupiter.api.Executable 函数式接口的实例作为要验证的断言，可以通过 lambda 表达式很容易的提供这些断言，只有该方法中的所有断言都通过该方法才可以通过
+
+```java
+@Test
+void testAssertAll() {
+    assertAll("测试失败",
+              () -> assertNotSame(new Object(), new Object()),
+              () -> assertTrue(1 == 1)
+             );
+}
+```
+
+#### 异常断言
+
+**assertThrows** 配合上函数接口进行使用
+
+```java
+@Test
+void testAssertThrows() {
+    // 第一个参数为抛出的异常类型，第二个参数为执行的业务逻辑，第三个参数为提示信息
+    assertThrows(NullPointerException.class, () -> {
+        System.out.println("11111");
+    },"未能抛出 NullPointerException 异常");
+}
+```
+
+#### 超时断言
+
+**assertTimeout()** 为测试方法设置了超时时间
+
+```java
+@Test
+void testAssertTimeout() {
+    // 第一个参数为 Duration 示例，第二个参数为要执行的业务逻辑，第三个参数为提示信息
+    assertTimeout(Duration.ofMillis(500), () -> {
+        Thread.sleep(1000);
+    }, "超时啦");
+}
+```
+
+#### 快速失败
+
+通过 **fail** 方法使得测试直接失败
+
+```java
+@Test
+void testFail() {
+    fail("失败了");
+}
+```
+
+#### 测试
+
+1. 使用 IDEA 的 `test` 测试功能
+
+   ![image-20220201113746627](README.assets/image-20220201113746627.png)
    
 
+2. 查看控制台打印的测试报告
 
+   ![image-20220201114041427](README.assets/image-20220201114041427.png)
+
+### 前置条件
+
+和断言类似，不同之处在于 **如果断言失败会使得测试方法失败**，而 **前置条件不成立只会使得测试方法的执行终止**，可以看做是测试方法执行的前提，当前提不满足时，没有继续执行的必要
+
+```java
+@Test
+void testAssumeTrue() {
+    // 第一个参数为前置条件(可以写对应的业务逻辑)，第二个参数为当条件未成立时抛出的信息
+    assumeTrue(true, "前置条件没有成立");
+    System.out.println("test assumeTrue()....");
+    assumeFalse(() -> Objects.equals(new Object(), new Object()));
+    System.out.println("test assumeFalse()...");
+}
+
+@Test
+void testAssumeThat() {
+    // 第一个参数为前置条件，只有第一个参数为 true 才会执行的参数中第二个参数编写的业务逻辑
+    assumingThat(1 == 1, () -> {
+        System.out.println("test assumeThat...");
+    });
+    System.out.println("无论 assumingThat 第一个参数是否为 true，剩下的代码都会执行");
+}
+```
+
+`assumeTrue() / assumeFalse()`: 只有第一个参数返回的结果为 True / False 时，剩下的代码才会执行，否则就会终止测试
+
+`assumingThat()`: 只有第一个参数返回的结果为 True，才会执行第二个参数配置的业务逻辑，该方法无论第一个参数的返回结果为 True / False, 剩下的代码都会执行
+
+### 嵌套测试
+
+可以通过 Java 内部类 + `@Nested` 注解实现嵌套测试，从而更好的把相关的测试方法组织在一起
+
+```java
+@DisplayName("A stack")
+class TestingAStackDemo {
+
+    Stack<Object> stack;
+
+    @Test
+    @DisplayName("is instantiated with new Stack()")
+    void isInstantiatedWithNew() {
+        new Stack<>();
+    }
+
+    @Nested
+    @DisplayName("when new")
+    class WhenNew {
+
+        @BeforeEach
+        void createNewStack() {
+            stack = new Stack<>();
+        }
+
+        @Test
+        @DisplayName("is empty")
+        void isEmpty() {
+            assertTrue(stack.isEmpty());
+        }
+
+        @Test
+        @DisplayName("throws EmptyStackException when popped")
+        void throwsExceptionWhenPopped() {
+            assertThrows(EmptyStackException.class, stack::pop);
+        }
+
+        @Test
+        @DisplayName("throws EmptyStackException when peeked")
+        void throwsExceptionWhenPeeked() {
+            assertThrows(EmptyStackException.class, stack::peek);
+        }
+
+        @Nested
+        @DisplayName("after pushing an element")
+        class AfterPushing {
+
+            String anElement = "an element";
+
+            @BeforeEach
+            void pushAnElement() {
+                stack.push(anElement);
+            }
+
+            @Test
+            @DisplayName("it is no longer empty")
+            void isNotEmpty() {
+                assertFalse(stack.isEmpty());
+            }
+
+            @Test
+            @DisplayName("returns the element when popped and is empty")
+            void returnElementWhenPopped() {
+                assertEquals(anElement, stack.pop());
+                assertTrue(stack.isEmpty());
+            }
+
+            @Test
+            @DisplayName("returns the element when peeked but remains not empty")
+            void returnElementWhenPeeked() {
+                assertEquals(anElement, stack.peek());
+                assertFalse(stack.isEmpty());
+            }
+        }
+    }
+}
+```
+
+注意：
+
+1. 如果不在类上使用 `@Nested` 注解，那么该内部类中的测试方法 `@Test` 是无法生效的
+2. 内部类执行时也会调用外部类编写的 `@BeforeEach` 相关注解的方法
+3. 外部类的测试方法执行时并不会调用内部类配置 `@BeforeEach` 相关注解的方法
+
+### 参数化测试
+
+Junit5 中的新特性，它使得不同的参数多次运行测试成功了可能，利用以下注解可以实现随机传参：
+
+- **@ValueSource**: 为参数化测试指定入参来源，支持八大基础类以及String类型,Class类型
+- **@NullSource**: 表示为参数化测试提供一个null的入参
+- **@EnumSource**: 表示为参数化测试提供一个枚举入参
+- **@CsvFileSource**：表示读取指定CSV文件内容作为参数化测试入参
+- **@MethodSource**：表示读取指定方法的返回值作为参数化测试入参(注意方法返回**需要是一个流**)
+
+```java
+@ParameterizedTest
+// 指定入参来源
+@ValueSource(strings = {"one", "tow", "three"})
+@DisplayName("参数化测试1")
+void parameterizedTest1(String str) {
+    System.out.println(str);
+    assertTrue(StringUtils.isNotBlank(str));
+}
+
+@ParameterizedTest
+// 指定方法返回值入参
+@MethodSource("method")
+@DisplayName("方法来源参数")
+public void testWithExplicitLocalMethodSource(String name) {
+    System.out.println(name);
+    Assertions.assertNotNull(name);
+}
+
+static Stream<String> method() {
+    return Stream.of("apple", "banana");
+}
+```
 
 
 

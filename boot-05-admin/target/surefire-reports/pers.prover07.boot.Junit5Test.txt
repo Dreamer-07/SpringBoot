@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------
+Test set: pers.prover07.boot.Junit5Test
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 1, Skipped: 1, Time elapsed: 0.036 s <<< FAILURE! - in pers.prover07.boot.Junit5Test
+testTimeout  Time elapsed: 0.007 s  <<< ERROR!
+java.util.concurrent.TimeoutException: testTimeout() timed out after 500 microseconds
+

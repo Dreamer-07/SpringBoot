@@ -1,0 +1,20 @@
+-------------------------------------------------------------------------------
+Test set: pers.prover07.boot.Junit5AssertTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 1.009 s <<< FAILURE! - in pers.prover07.boot.Junit5AssertTest
+testAssertTimeout  Time elapsed: 1.003 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 超时啦 ==> execution exceeded timeout of 500 ms by 506 ms
+	at pers.prover07.boot.Junit5AssertTest.testAssertTimeout(Junit5AssertTest.java:52)
+
+testFail  Time elapsed: 0 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 失败了
+	at pers.prover07.boot.Junit5AssertTest.testFail(Junit5AssertTest.java:59)
+
+testAssertEquals  Time elapsed: 0.001 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 两值并不相等 ==> expected: <1> but was: <2>
+	at pers.prover07.boot.Junit5AssertTest.testAssertEquals(Junit5AssertTest.java:22)
+
+testAssertThrows  Time elapsed: 0.001 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 未能抛出 NullPointerException 异常 ==> Expected java.lang.NullPointerException to be thrown, but nothing was thrown.
+	at pers.prover07.boot.Junit5AssertTest.testAssertThrows(Junit5AssertTest.java:44)
+
