@@ -1319,7 +1319,6 @@ void testFail() {
 
    ![image-20220201113746627](README.assets/image-20220201113746627.png)
    
-
 2. 查看控制台打印的测试报告
 
    ![image-20220201114041427](README.assets/image-20220201114041427.png)
@@ -1470,11 +1469,447 @@ static Stream<String> method() {
 }
 ```
 
+## 指标监控
+
+### 简介
+
+未来每一个微服务在云上部署以后，我们都需要对其进行监控、追踪、审计、控制等。SpringBoot就抽取了Actuator场景，使得我们每个微服务快速引用即可获得生产级别的应用监控、审计等功能。
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+![image-20220202110914568](README.assets/image-20220202110914568.png)
+
+
+### 使用
+
+1. 导入依赖
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-actuator</artifactId>
+   </dependency>
+   ```
+
+2. 修改配置文件，暴露监控信息端点
+
+   ```yaml
+   management:
+     endpoints:
+       # 以 web 的方式暴露端点
+       web:
+         exposure:
+           # 暴露所有端点
+           include: "*"
+   ```
+
+   可以在 https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator 上查看所有端点
+
+3. 启动项目测试
+
+   http://localhost:8080/actuator/beans									
+
+   http://localhost:8080/actuator/configprops						  
+
+   http://localhost:8080/actuator/metrics								  
+
+   http://localhost:8080/actuator/metrics/jvm.gc.pause         
+
+   ...
+
+### 监控端点
+
+#### 端点大全
+
+> 可以通过 http://localhost:8080/actuator 查看开启的端点
+
+| ID                 | 描述                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| `auditevents`      | 暴露当前应用程序的审核事件信息。需要一个`AuditEventRepository组件`。 |
+| `beans`            | 显示应用程序中所有Spring Bean的完整列表。                    |
+| `caches`           | 暴露可用的缓存。                                             |
+| `conditions`       | 显示自动配置的所有条件信息，包括匹配或不匹配的原因。         |
+| `configprops`      | 显示所有`@ConfigurationProperties`。                         |
+| `env`              | 暴露Spring的属性`ConfigurableEnvironment`                    |
+| `flyway`           | 显示已应用的所有Flyway数据库迁移。 需要一个或多个`Flyway`组件。 |
+| `health`           | 显示应用程序运行状况信息。                                   |
+| `httptrace`        | 显示HTTP跟踪信息（默认情况下，最近100个HTTP请求-响应）。需要一个`HttpTraceRepository`组件。 |
+| `info`             | 显示应用程序信息。                                           |
+| `integrationgraph` | 显示Spring `integrationgraph` 。需要依赖`spring-integration-core`。 |
+| `loggers`          | 显示和修改应用程序中日志的配置。                             |
+| `liquibase`        | 显示已应用的所有Liquibase数据库迁移。需要一个或多个`Liquibase`组件。 |
+| `metrics`          | 显示当前应用程序的“指标”信息。                               |
+| `mappings`         | 显示所有`@RequestMapping`路径列表。                          |
+| `scheduledtasks`   | 显示应用程序中的计划任务。                                   |
+| `sessions`         | 允许从Spring Session支持的会话存储中检索和删除用户会话。需要使用Spring Session的基于Servlet的Web应用程序。 |
+| `shutdown`         | 使应用程序正常关闭。默认禁用。                               |
+| `startup`          | 显示由`ApplicationStartup`收集的启动步骤数据。需要使用`SpringApplication`进行配置`BufferingApplicationStartup`。 |
+| `threaddump`       | 执行线程转储。                                               |
+
+如果您的应用程序是Web应用程序（Spring MVC，Spring WebFlux或Jersey），则可以使用以下附加端点：
+
+| ID           | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `heapdump`   | 返回`hprof`堆转储文件。                                      |
+| `jolokia`    | 通过HTTP暴露JMX bean（需要引入Jolokia，不适用于WebFlux）。需要引入依赖`jolokia-core`。 |
+| `logfile`    | 返回日志文件的内容（如果已设置`logging.file.name`或`logging.file.path`属性）。支持使用HTTP`Range`标头来检索部分日志文件的内容。 |
+| `prometheus` | 以Prometheus服务器可以抓取的格式公开指标。需要依赖`micrometer-registry-prometheus`。 |
+
+最常用的Endpoint
+
+- **Health：监控状况**
+- **Metrics：运行时指标**
+
+- **Loggers：日志记录**
+
+#### Health Endpoint
+
+作用：健康检查端点，一般用于**云平台**，云平台需要定时检查应用的健康状况，就可以通过该端点为平台返回当前应用的 **一系列组件健康状况的集合**
+
+注意：
+
+1. 该端点返回的结果，应该是一系列健康检查后的一个**汇总报告**
+2. 很多健康检查默认已经配置好了，例如：数据库，redis 等
+3. **自定义的健康检查机制**
+
+修改配置文件，让其该端点可以返回更详细的信息
+
+```yaml
+management:
+  endpoint:
+    health:
+      # 开启该监控端点(当默认关闭所有端点时可以单独配置，默认为 true)
+      enabled: true
+      # 显示组件详细信息
+      show-details: always
+```
+
+![image-20220202113456813](README.assets/image-20220202113456813.png)
+
+
+
+#### Metrices Endpoint
+
+作用：提供详细的，层级的，空间指标信息；这些信息可以被 pull(主动推送) 或者 push(被动获取) 方式得到
+
+- 通过 Metrics 对接多种监控系统
+- 简化核心 Metrics 开发
+
+- 添加自定义 Metrics 或者扩展已有 Metrics
+
+使用：
+
+- 通过 http://localhost:8080/actuator/metrics 可以查看当前支持查看的不同指标信息
+- 通过 http://localhost:8080/actuator/metrics/{指标信息名} 可以查看对应指标信息的详细信息  
+
+###  定制 Endpoint 
+
+#### 添加 Health 信息
+
+> 实现 **HealthIndicator** 接口并将组件注册到容器中即可，注入类名必须为 **xxxHealthIndicator**
+
+```java
+@Component
+public class ByqTxdyHealthIndicator implements HealthIndicator {
+
+    /**
+     * 主要返回自定义的健康监控信息
+     * @return
+     */
+    @Override
+    public Health health() {
+        // 模拟检查健康信息
+        if (1 == 1) {
+            // up 表示健康
+            return Health.up()
+                .withDetail("status", "success")
+                .withDetail("code", 200)
+                .build();
+        } else {
+            // down 表示不健康
+            return Health
+                //.down()
+                // 通过观察源码可以发现，底层是调用 status(Status.DOWN) 设置不同状态的，那这里也可以通过 status 设置(只要不是 Status.UP 都是不健康的)
+                .status(Status.UNKNOWN)
+                .withDetail("status", "fail")
+                .withDetail("code", 500)
+                .build();
+        }
+    }
+
+}
+```
+
+在配置文件中打开 **health** 节点返回详细信息的配置
+
+```yaml
+management:
+  endpoint:
+    health:
+      # 开启该监控端点(当默认关闭所有端点时可以单独配置，默认为 true)
+      enabled: true
+      # 显示组件详细信息
+      show-details: always
+```
+
+启动项目，访问 http://localhost:8080/actuator/health 查看
+
+```json
+{
+    status: "UP",
+    components: {
+        byqTxdy: { // 自定义的健康状态项 key 为对应类 xxxHealthIndicator 中的 xxx
+            status: "UP",
+            details: {
+                status: "success",
+                code: 200
+            }
+        },
+        diskSpace: {
+            status: "UP",
+            details: {
+                total: 296022437888,
+                free: 137792806912,
+                threshold: 10485760,
+                exists: true
+            }
+        },
+        ping: {
+            status: "UP"
+        }
+    }
+}
+```
+
+> 继承 **AbstractHealthIndicator** 类
+
+```java
+@Component
+public class MyComHealthIndicator extends AbstractHealthIndicator {
+    @Override
+    protected void doHealthCheck(Health.Builder builder) throws Exception {
+        HashMap<String, Object> infoMap = new HashMap<>();
+        if (1 == 1) {
+            builder.up();
+            infoMap.put("count", 1);
+            infoMap.put("ms", 100);
+        } else {
+            builder.status(Status.DOWN);
+            infoMap.put("key", "鸡汤老咯");
+            infoMap.put("key2", "heixiuxiu");
+        }
+        builder.withDetails(infoMap);
+    }
+}
+```
+
+接下来的步骤和上面第一种方式一样
+
+```json
+{
+    status: "UP",
+    components: {
+        byqTxdy: {
+            status: "UP",
+            details: {
+                status: "success",
+                code: 200
+            }
+        },
+        diskSpace: {
+            status: "UP",
+            details: {
+                total: 296022437888,
+                free: 137792794624,
+                threshold: 10485760,
+                exists: true
+            }
+        },
+        myCom: {
+            status: "UP",
+            details: {
+                ms: 100,
+                count: 1
+            }
+        },
+        ping: {
+            status: "UP"
+        }
+    }
+}
+```
+
+#### 定义 Info 端点信息
+
+> 通过配置文件
+
+```yaml
+info:
+  appName: boot-admin
+  byq: txdy
+  projectName: @project.artifactId@ #可以使用 @@ 读取 maven 中 pom 文件的值
+  projectVersion: @project.version@
+```
+
+访问 http://localhost:8080/actuator/info 查看
+
+![image-20220202131307248](README.assets/image-20220202131307248.png)
+
+> 编写 InfoContributor
+
+```java
+@Component
+public class ExampleInfoContributor implements InfoContributor {
+    @Override
+    public void contribute(Info.Builder builder) {
+        builder.withDetail("example", Collections.singletonMap("key", "value"));
+    }
+}
+```
+
+```json
+{
+    appName: "boot-admin",
+    byq: "txdy",
+    projectName: "boot-05-admin",
+    projectVersion: "0.0.1-SNAPSHOT",
+    example: {
+        key: "value"
+    }
+}
+```
+
+#### 添加 Metrics 指标信息
+
+```java
+@RestController
+public class MetricsController {
+
+    Counter counter;
+
+    public MetricsController(MeterRegistry meterRegistry) {
+        // 通过 MeterRegistry 构建的一个监控信息对象
+        // 这里的 counter 是用来监控统计信息的
+        counter = meterRegistry.counter("test.MeterRegistry.count");
+    }
+
+    @RequestMapping("/meterRegistry")
+    public String testMeterRegistry() {
+        counter.increment();
+        return "test.meterRegistry";
+    }
+
+}
+```
+
+启动，访问 http://localhost:8080/actuator/metrics
+
+![image-20220202132308914](README.assets/image-20220202132308914.png)
+
+访问 http://localhost:8080/actuator/metrics/test.MeterRegistry.count 
+
+![image-20220202132355111](README.assets/image-20220202132355111.png)
+
+#### 添加 Endpoint
+
+```java
+@Component
+// 标识 endpoint name
+@Endpoint(id = "custom")
+public class CustomEndpoint {
+
+    @ReadOperation
+    public Map getEndpointInfo() {
+        return Collections.singletonMap("info", "custom endpint start...");
+    }
+
+    @WriteOperation
+    public void restartEndpoint() {
+        System.out.println("tnnd");
+    }
+
+}
+```
+
+访问 http://localhost:8080/actuator/ 可以查看所有 Endpoint
+
+访问 http://localhost:8080/actuator/${endpointName } 可以查看对应 Endpoint 调用 **@ReadOperation** 方法返回的信息
+
+![image-20220202133107883](README.assets/image-20220202133107883.png)
+
+### 可视化
+
+github 地址：https://github.com/codecentric/spring-boot-admin
+
+> 使用
+
+1. 新建一个模块/项目作为监控服务器，用来监控所有应用
+
+2. 导入依赖
+
+   ```xml
+   <dependency>
+       <groupId>de.codecentric</groupId>
+       <artifactId>spring-boot-admin-starter-server</artifactId>
+       <version>2.3.1</version>
+   </dependency>
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-web</artifactId>
+   </dependency>
+   ```
+
+3. 在启动类上添加 `@EnableAdminServer` 注解 
+
+   ```java
+   @SpringBootApplication
+   @EnableAdminServer
+   public class Boot06AdminServerApplication
+   ```
+
+4. 回到需要监控的模块，导入以下依赖
+
+   ```xml
+   <dependency>
+       <groupId>de.codecentric</groupId>
+       <artifactId>spring-boot-admin-starter-client</artifactId>
+       <version>2.3.1</version>
+   </dependency>
+   ```
+
+5. 修改配置文件
+
+   ```yaml
+   spring:
+     application:
+       # 定义应用名
+       name: boot-05-admin
+     boot:
+       admin:
+         client:
+           # 监控服务器地址
+           url: http://localhost:8888
+           instance:
+             # 通过 ip 注册到监控服务器中
+             prefer-ip: true
+   ```
+
+6. 启动两个模块，访问 localhost:8888 (监控服务器地址)
+
+   ![image-20220202135503998](README.assets/image-20220202135503998.png)
+
+7. 查看实例的详细监控信息
+
+   ![image-20220202135532460](README.assets/image-20220202135532460.png)
+
+> 感觉这个生产监控可以展开细讲一篇，有机会在学(TODO: )
 
 
 
 
-
-
- 
 

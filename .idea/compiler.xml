@@ -10,6 +10,7 @@
         <module name="01-hello-world" />
         <module name="boot-05-admin" />
         <module name="boot-03-web" />
+        <module name="boot-06-admin-server" />
         <module name="boot-02-yaml" />
       </profile>
     </annotationProcessing>
@@ -18,6 +19,7 @@
       <module name="boot-02-yaml" target="1.8" />
       <module name="boot-03-web" target="1.8" />
       <module name="boot-05-admin" target="1.8" />
+      <module name="boot-06-admin-server" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -26,6 +28,7 @@
       <module name="boot-02-yaml" options="-parameters" />
       <module name="boot-03-web" options="-parameters" />
       <module name="boot-05-admin" options="-parameters" />
+      <module name="boot-06-admin-server" options="-parameters" />
     </option>
   </component>
 </project>

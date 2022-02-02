@@ -1,0 +1,26 @@
+{
+  "groups": [
+    {
+      "name": "management.endpoint.custom",
+      "type": "pers.prover07.boot.actuator.endpoint.CustomEndpoint",
+      "sourceType": "pers.prover07.boot.actuator.endpoint.CustomEndpoint"
+    }
+  ],
+  "properties": [
+    {
+      "name": "management.endpoint.custom.cache.time-to-live",
+      "type": "java.time.Duration",
+      "description": "Maximum time that a response can be cached.",
+      "sourceType": "pers.prover07.boot.actuator.endpoint.CustomEndpoint",
+      "defaultValue": "0ms"
+    },
+    {
+      "name": "management.endpoint.custom.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable the custom endpoint.",
+      "sourceType": "pers.prover07.boot.actuator.endpoint.CustomEndpoint",
+      "defaultValue": true
+    }
+  ],
+  "hints": []
+}

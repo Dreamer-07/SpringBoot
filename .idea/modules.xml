@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/boot-02-yaml/boot-02-yaml.iml" filepath="$PROJECT_DIR$/boot-02-yaml/boot-02-yaml.iml" />
       <module fileurl="file://$PROJECT_DIR$/boot-03-web/boot-03-web.iml" filepath="$PROJECT_DIR$/boot-03-web/boot-03-web.iml" />
       <module fileurl="file://$PROJECT_DIR$/boot-05-admin/boot-05-admin.iml" filepath="$PROJECT_DIR$/boot-05-admin/boot-05-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/boot-06-admin-server/boot-06-admin-server.iml" filepath="$PROJECT_DIR$/boot-06-admin-server/boot-06-admin-server.iml" />
     </modules>
   </component>
 </project>

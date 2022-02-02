@@ -1,0 +1,33 @@
+management:
+  endpoints:
+    # 以 web 的方式暴露端点
+    web:
+      exposure:
+        # 暴露所有端点
+        include: "*"
+
+  endpoint:
+    health:
+      # 开启该监控端点(当默认关闭所有端点时可以单独配置，默认为 true)
+      enabled: true
+      # 显示组件详细信息
+      show-details: always
+
+info:
+  appName: boot-admin
+  byq: txdy
+  projectName: boot-05-admin #可以使用 @@ 读取 maven 中 pom 文件的值
+  projectVersion: 0.0.1-SNAPSHOT
+
+spring:
+  application:
+    # 定义应用名
+    name: boot-05-admin
+  boot:
+    admin:
+      client:
+        # 监控服务器地址
+        url: http://localhost:8888
+        instance:
+          # 通过 ip 注册到监控服务器中
+          prefer-ip: true
