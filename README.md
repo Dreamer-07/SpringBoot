@@ -1909,7 +1909,150 @@ github 地址：https://github.com/codecentric/spring-boot-admin
 
 > 感觉这个生产监控可以展开细讲一篇，有机会在学(TODO: )
 
+## 扩展
 
+### Profile
 
+作用：方便多环境的适配，springboot 简化了 profile 的功能，能够支持在不同环境下切换不同配置
 
+#### application-profile
+
+- 默认配置文件 `application.yaml` 在任何环境下都会加载
+
+- 如果需要创建指定环境(例如 `prop`)下的配置文件，采用 `application-${profile}.yaml(properties)` 的格式
+
+- 激活指定配置环境
+
+  1. 通过 `application.properties` 设置默认激活环境
+
+     ```properties
+     spring.profiles.active=prod
+     ```
+
+  2. 通过命令行激活环境 ; 通过 `--` 可以修改配置文件中的任意值且命令行配置优先
+
+     ```bash
+     java -jar boot-06-admin-server-0.0.1-SNAPSHOT.jar --spring.profiles.active=test
+     ```
+
+- 默认配置和环境配置会同时生效
+
+- 同名配置项，profile 中的配置优先
+
+> 实例
+
+可以创建两个文件 `application-prod.yaml` , `application-test.yaml` 
+
+```properties
+server.port=8080
+
+# 设置默认开启的是 prod 环境
+spring.profiles.active=prod
+```
+
+```yaml
+# application-prod.yaml
+server:
+  port: 7777
+  
+# application-test.yaml
+server:
+  port: 8888
+```
+
+启动服务器通过观察启动端口号即可知道是否激活环境
+
+#### @Profile 条件装配
+
+作用：在向容器中注入组件时，可以通过 `@Profile` 注解声明只有在指定环境下才会注册该组件
+
+```java
+@SpringBootApplication
+@EnableAdminServer
+public class Boot06AdminServerApplication {
+
+    @Profile("prod")
+    @Bean
+    public Person person01() {
+        return new Person("prod profile");
+    }
+
+    @Profile("test")
+    @Bean
+    public Person person02() {
+        return new Person("test profile");
+    }
+
+    public static void main(String[] args) {
+        ConfigurableApplicationContext context = SpringApplication.run(Boot06AdminServerApplication.class, args);
+        Person person = context.getBean(Person.class);
+        System.out.println(person.getName());
+    }
+
+}
+```
+
+观察控制台输出
+
+#### profile 分组
+
+作用：可以实现同一环境下降低配置文件的耦合度
+
+```properties
+# 设置默认开启的环境
+spring.profiles.active=byq
+
+# 设置环境分组
+spring.profiles.group.byq[0]=byq
+spring.profiles.group.byq[1]=prod
+
+spring.profiles.group.txdy=test
+```
+
+```java
+@RestController
+public class TestController {
+
+    /**
+     * 通过 @Value 注解绑定配置文件属性; 可以通过 : 设置默认值
+     */
+    @Value("${person.info:default str}")
+    public String info;
+
+    @GetMapping("/profiles")
+    public String profiles() {
+        return info;
+    }
+
+}
+```
+
+> 通过 @Value 注解可以读取配置文件中的值
+
+访问接口，观察返回的值
+
+### 外部化配置
+
+#### 外部配置源
+
+Java 属性文件，YAML 文件，环境变量，命令行参数
+
+#### 配置文件查找位置
+
+> 配置项会依次加载，如果存在重复的配置，以后者为准
+
+1. classpath 根路径
+2. classpath 根路径下config目录
+3. jar包当前目录
+4. jar包当前目录的config目录
+5. (只有在LInux系统上才可以)  `/config` 子目录的直接子目录
+
+#### 配置文件加载顺序
+
+> 配置项会依次加载，如果存在重复的配置，以后者为准
+
+1. 当前jar包内部的application.properties和application.yml
+2. 当前jar包内部的application-{profile}.properties 和 application-{profile}.yml
+3. 引用的外部 jar 包的 application.properties 和 application.yml
+4. 引用的外部 jar 包的 application-{profile}.properties 和 application-{profile}.yml
 
